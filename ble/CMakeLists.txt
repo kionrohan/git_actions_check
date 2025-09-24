@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 set(PICO_BOARD pico_w)
-include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
+set(PICO_SDK_PATH "${CMAKE_CURRENT_LIST_DIR}/external/pico-sdk")
+include(${PICO_SDK_PATH}/pico_sdk_import.cmake)
 
 project(Kolokvium C CXX ASM)
 set(CMAKE_C_STANDARD 11)
