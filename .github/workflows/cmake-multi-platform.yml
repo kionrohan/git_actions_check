@@ -53,6 +53,9 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+
+    - name: List BLE folder
+      run: ls -R ble/external/pico-sdk
     - name: Clone Pico SDK
       run: |
         mkdir -p ble/external
