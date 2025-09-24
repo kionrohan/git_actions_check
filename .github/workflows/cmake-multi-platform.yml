@@ -55,6 +55,7 @@ jobs:
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
     - name: Clone Pico SDK
       run: |
+        mkdir -p ble/external
         git clone -b master https://github.com/raspberrypi/pico-sdk.git ble/external/pico-sdk
 
     - name: Configure CMake
