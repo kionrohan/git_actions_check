@@ -53,6 +53,9 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+    - name: Clone Pico SDK
+      run: |
+        git clone -b master https://github.com/raspberrypi/pico-sdk.git external/pico-sdk
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
