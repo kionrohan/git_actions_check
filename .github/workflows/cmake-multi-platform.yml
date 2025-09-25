@@ -45,8 +45,10 @@ jobs:
             c_compiler: cl
  
     steps:
-    - uses: actions/checkout@v4
- 
+    # Checkout code first
+    - name: Checkout code
+      uses: actions/checkout@v4
+
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
@@ -54,16 +56,21 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
+    # Clone Pico SDK manually if not using submodules
     - name: Clone Pico SDK
       run: |
         mkdir -p ble/external
-        git clone -b master https://github.com/raspberrypi/pico-sdk.git ble/external/pico-sdk
-    - name: List BLE folder
-      run: ls -R ble/external/pico-sdk
-    - name: Checkout code with submodules
-      uses: actions/checkout@v4
-      with:
-         submodules: recursive
+        git clone --depth 1 -b master https://github.com/raspberrypi/pico-sdk.git ble/external/pico-sdk
+        cd ble/external/pico-sdk
+        git submodule update --init --recursive --depth 1
+
+    # Verify that pico-sdk was cloned correctly
+    - name: Verify Pico SDK
+      run: |
+        ls -la ble/external/pico-sdk/
+        echo "Checking for pico_sdk_import.cmake:"
+        ls -la ble/external/pico-sdk/pico_sdk_import.cmake || echo "File not found!"
+
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
