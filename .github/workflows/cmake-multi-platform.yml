@@ -91,7 +91,12 @@ jobs:
         ls -la ble/external/pico-sdk/pico_sdk_init.cmake
         echo "✓ All required files found!"
 
-    # STEP 4: Configure CMake (Remove compiler overrides for Pico projects)
+    # Step to clean the build directory 
+    - name: Clean build directory
+      run: rm -rf ${{ steps.strings.outputs.build-output-dir }}
+
+
+    # STEP 4: Configure CMake 
     - name: Configure CMake
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
@@ -99,7 +104,7 @@ jobs:
         -S ${{ github.workspace }}/ble
 
     - name: Build
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }} --verbose
 
     - name: Test
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
