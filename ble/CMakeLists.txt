@@ -38,16 +38,11 @@ target_link_libraries(fleet_management_main
     pico_cyw43_arch_lwip_threadsafe_background 
 )
 
-target_compile_definitions(fleet_management_main PRIVATE
-    "CYW43_DEFAULT_IP_AP_ADDRESS=IP4_ADDR_VALUE(192,168,4,1)"
-    IS_SERVER
-)    
-
-
-
-
 # If using .gatt file and btstack config
-target_include_directories(fleet_management_main PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(fleet_management_main PRIVATE 
+${CMAKE_CURRENT_LIST_DIR}
+${PICO_SDK_PATH}/lib/lwip/include
+)
 
 pico_btstack_make_gatt_header(fleet_management_main PRIVATE "${CMAKE_CURRENT_LIST_DIR}/uart.gatt")
 
