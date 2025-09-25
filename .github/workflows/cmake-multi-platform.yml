@@ -56,12 +56,20 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-    # Install ARM GCC toolchain for Pico development
-    - name: Install ARM GCC toolchain (Linux)
-      if: matrix.os == 'ubuntu-latest'
+    # Install ARM GCC toolchain using dedicated action
+    - name: Install ARM GCC toolchain
+      uses: carlosperate/arm-none-eabi-gcc-action@v1
+      with:
+        release: '13.2.Rel1'
+
+    # Verify ARM GCC installation
+    - name: Verify ARM GCC installation
+      shell: bash
       run: |
-        sudo apt-get update
-        sudo apt-get install -y gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
+        echo "Checking ARM GCC installation:"
+        arm-none-eabi-gcc --version
+        echo "ARM GCC location:"
+        which arm-none-eabi-gcc
 
     # Setup Pico SDK properly - Simple approach
     - name: Clone Pico SDK
