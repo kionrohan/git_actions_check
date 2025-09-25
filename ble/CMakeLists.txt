@@ -38,10 +38,10 @@ target_link_libraries(fleet_management_main
     pico_cyw43_arch_lwip_threadsafe_background 
 )
 
-pico_configure_ip4_address(fleet_management_main PRIVATE
-        CYW43_DEFAULT_IP_AP_ADDRESS 192.168.4.1
-        )
-pico_add_extra_outputs(fleet_management_main)      
+target_compile_definitions(fleet_management_main PRIVATE
+    CYW43_DEFAULT_IP_AP_ADDRESS=IP4_ADDR_VALUE(192,168,4,1)
+    IS_SERVER
+)    
 
 # pico_configure_ip4_address(fleet_management_main PRIVATE
 #     CYW43_DEFAULT_IP_AP_ADDRESS 192.168.4.1
