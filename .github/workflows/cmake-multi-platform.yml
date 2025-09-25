@@ -56,20 +56,81 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-    # Clone Pico SDK manually if not using submodules
-    - name: Clone Pico SDK
+    # Install ARM GCC toolchain for Pico development
+    - name: Install ARM GCC toolchain (Linux)
+      if: matrix.os == 'ubuntu-latest'
       run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
+
+    # Setup Pico SDK properly
+    - name: Setup Pico SDK
+      run: |
+        # Create external directory
         mkdir -p ble/external
-        git clone --depth 1 -b master https://github.com/raspberrypi/pico-sdk.git ble/external/pico-sdk
+        
+        # Clone a specific stable version of the Pico SDK
+        git clone --branch 1.5.1 --depth 1 https://github.com/raspberrypi/pico-sdk.git ble/external/pico-sdk
+        
+        # Initialize submodules
         cd ble/external/pico-sdk
         git submodule update --init --recursive --depth 1
+        
+        # List contents to verify
+        echo "Pico SDK contents:"
+        ls -la
+        
+        # Check if pico_sdk_import.cmake exists
+        if [ -f "pico_sdk_import.cmake" ]; then
+          echo "✓ pico_sdk_import.cmake found"
+        else
+          echo "✗ pico_sdk_import.cmake not found, creating it..."
+          # Create the import file based on the standard template
+          cat > pico_sdk_import.cmake << 'EOF'
+        # This is a copy of <PICO_SDK_PATH>/pico_sdk_import.cmake
 
-    # Verify that pico-sdk was cloned correctly
-    - name: Verify Pico SDK
+        # This can be dropped into an external project to help locate this SDK
+        # It should be include()ed prior to project()
+
+        if (DEFINED ENV{PICO_SDK_PATH} AND (NOT PICO_SDK_PATH))
+            set(PICO_SDK_PATH $ENV{PICO_SDK_PATH})
+            message("Using PICO_SDK_PATH from environment ('${PICO_SDK_PATH}')")
+        endif ()
+
+        if (DEFINED ENV{PICO_SDK_FETCH_FROM_GIT} AND (NOT PICO_SDK_FETCH_FROM_GIT))
+            set(PICO_SDK_FETCH_FROM_GIT $ENV{PICO_SDK_FETCH_FROM_GIT})
+            message("Using PICO_SDK_FETCH_FROM_GIT from environment ('${PICO_SDK_FETCH_FROM_GIT}')")
+        endif ()
+
+        if (DEFINED ENV{PICO_SDK_FETCH_FROM_GIT_PATH} AND (NOT PICO_SDK_FETCH_FROM_GIT_PATH))
+            set(PICO_SDK_FETCH_FROM_GIT_PATH $ENV{PICO_SDK_FETCH_FROM_GIT_PATH})
+            message("Using PICO_SDK_FETCH_FROM_GIT_PATH from environment ('${PICO_SDK_FETCH_FROM_GIT_PATH}')")
+        endif ()
+
+        set(PICO_SDK_PATH "${CMAKE_CURRENT_LIST_DIR}")
+        if (NOT EXISTS ${PICO_SDK_PATH})
+            message(FATAL_ERROR "Directory '${PICO_SDK_PATH}' not found")
+        endif ()
+
+        set(PICO_SDK_INIT_CMAKE_FILE ${PICO_SDK_PATH}/pico_sdk_init.cmake)
+        if (NOT EXISTS ${PICO_SDK_INIT_CMAKE_FILE})
+            message(FATAL_ERROR "Directory '${PICO_SDK_PATH}' does not appear to contain the Raspberry Pi Pico SDK")
+        endif ()
+
+        set(PICO_SDK_PATH ${PICO_SDK_PATH} CACHE PATH "Path to the Raspberry Pi Pico SDK" FORCE)
+
+        include(${PICO_SDK_INIT_CMAKE_FILE})
+        EOF
+          echo "✓ Created pico_sdk_import.cmake"
+        fi
+
+    # Verify setup
+    - name: Verify Pico SDK Setup
       run: |
-        ls -la ble/external/pico-sdk/
-        echo "Checking for pico_sdk_import.cmake:"
-        ls -la ble/external/pico-sdk/pico_sdk_import.cmake || echo "File not found!"
+        echo "Checking required files:"
+        ls -la ble/external/pico-sdk/pico_sdk_import.cmake
+        ls -la ble/external/pico-sdk/pico_sdk_init.cmake
+        echo "Pico SDK setup complete!"
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
