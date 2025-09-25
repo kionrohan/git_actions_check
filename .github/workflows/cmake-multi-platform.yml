@@ -25,11 +25,13 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
+    # STEP 1: Install ARM GCC Toolchain
     - name: Install ARM GCC toolchain
       uses: carlosperate/arm-none-eabi-gcc-action@v1
       with:
         release: '12.3.Rel1'
 
+    # STEP 2: Clone Pico SDK with proper submodule initialization
     - name: Setup Pico SDK
       shell: bash
       run: |
@@ -38,6 +40,14 @@ jobs:
         cd ble/external/pico-sdk
         git submodule update --init --recursive
 
+    # STEP 3: Verify ARM GCC is available
+    - name: Verify toolchain
+      shell: bash
+      run: |
+        arm-none-eabi-gcc --version
+        ls -la ble/external/pico-sdk/pico_sdk_import.cmake
+
+    # STEP 4: Configure CMake 
     - name: Configure CMake
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
