@@ -37,7 +37,7 @@
 
 
 #define CYW43_DEFAULT_IP_AP_ADDRESS IP4_ADDR_VALUE(192,168,4,1)
-#include <some_lwip_or_pico_header.h>
+#include "lwip/ip4_addr.h"
 
 #define UART_ID uart1
 #define UART_TX_PIN 8
